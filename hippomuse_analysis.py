@@ -153,22 +153,6 @@ df_plot_rotation.columns = ["banane", "cassis ","champignon","citron","fenouil",
 df_plot_rotation2 = df_plot_rotation.drop("Item")
 df_plot_rotation2.plot(kind='bar') 
 
-#"Create a new_dataframe for Reco_Image
-#df_mean = pd.DataFrame(columns=['champignon','cassis','lavande','banane', 'fenouil','citron'])
-#a= np.mean((Reco_box[Reco_box.Item == 'champignon']))
-#b =a.Result
-#c= np.mean((Reco_box[Reco_box.Item == 'cassis']))
-#d= c.Result
-#e= np.mean((Reco_box[Reco_box.Item == 'lavande']))
-#f= e.Result
-#g= np.mean((Reco_box[Reco_box.Item == 'banane']))
-#h= g.Result
-#i= np.mean((Reco_box[Reco_box.Item == 'fenouil']))
-#j= i.Result
-#k= np.mean((Reco_box[Reco_box.Item == 'citron']))
-#l= k.Result
-#df_mean.loc[1] = [b,d,f, h, j,l]
-#df_mean.plot(kind='bar')
 
 """ RECOGNITION IMAGE AND AGE"""
 Reco_Im=df[(df.Test=='reconnaissanceImage')] 
