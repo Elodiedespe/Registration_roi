@@ -32,66 +32,63 @@ import os
 dfOutput.to_csv('/home/edogerde/Desktop/hippomuseDataBase.csv', index=False)
 exdf = dfOutput[(dfOutput.GroupeAge == 'Grand') & (dfOutput.Phase == 'P1') & (dfOutput.Test == 'reconnaissanceOdeur')]
 
-"""Analysis"""
+
+
+"""DESCRIPTIVES ANALYSIS AND PLOTS"""
+
+#Import systems support
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
 
 df = pd.read_csv('/home/edogerde/Desktop/hippomuseDataBase.csv')
 
-""" TOTAL EPISODICITY AND AGE AND RT during P1"""
+"""TOTAL EPISODICITY AND AGE AND RT during P1 & P2"""
 #Select the test "episocite" and phase "1" 
 EpisoRT=df[(df.Test=='episodicite') & (df.Phase=='P1')]
 EpisoRT2 = EpisoRT.dropna(subset=['Result'])
+EpisoRT=EpisoRT["Age"].sort_values()
+#Select the test "episocite" and phase "1"
+EpisoRT= df[(df.Test=='episodicite') & (df.Phase=='P2')]
+EpisoRT=EpisoRT["Age"].sort_values()
+EpisoRT2 = EpisoRT.dropna(subset=['Result'])
 
+# Plot Episodicity score according to the RT  and the Age in P1 with mathplotlib
 plt.plot(EpisoRT2.Age[EpisoRT2.RT == 'RT'],EpisoRT2.Result[EpisoRT2.RT == 'RT'],'o')
 plt.plot(EpisoRT2.Age[EpisoRT2.RT == 'Pas RT'],EpisoRT2.Result[EpisoRT2.RT == 'Pas RT'], 'o')
 plt.ylabel("Score épisodicité totale en phase 1")
 plt.xlabel("Age")
 plt.title("Score episodicité totale en P1 en fonction de l'âge et de la presence de RT")
 
-# Score episodicite en "P1" en fonction de l'age et de la RT
+
+# Plot Episodicity score according to the RT  and the Age in P1 with seaborn
 sns.set(style="ticks", context="talk")
 pal = sns.cubehelix_palette(4, 1.5, .75, light=.6, dark=.2)
 g = sns.lmplot(x="Age", y="Result", hue="RT", data=EpisoRT2,
                palette=pal, size=7)
 g.set_axis_labels("Age (annees)", "Result (Score d'episodictite)")
 
-""" Boxplot : Score episodicité totale en P1 en fonction du Groupe d'Age et de la presence de RT"""
+# Boxplot Episodicity score according to the RT  and AgeGroup in P1 with seaborn
 ax = sns.boxplot(x="RT", y="Result", hue= "GroupeAge", data=EpisoRT2)
 ax = sns.stripplot(x="RT", y="Result", data=EpisoRT2, size=4, jitter=True, edgecolor="gray")
 
-# Select the test "episocite" and phase "2"
-EpisoRT= df[(df.Test=='episodicite') & (df.Phase=='P2')]
-EpisoRT=EpisoRT["Age"].sort()
-EpisoRT2 = EpisoRT.dropna(subset=['Result'])
+# Plot Episodicity score according to the RT  and the Age in P2 with mathplotlib
 plt.plot(EpisoRT2.Age[EpisoRT2.RT == 'RT'],EpisoRT2.Result[EpisoRT2.RT == 'RT'],'o')
 plt.plot(EpisoRT2.Age[EpisoRT2.RT == 'Pas RT'],EpisoRT2.Result[EpisoRT2.RT == 'Pas RT'], 'o')
 plt.ylabel("Score épisodicité totale en phase 2")
 plt.xlabel("Age")
 plt.title("Score episodicité totale en P2 en fonction de l'âge et de la presence de RT")
 
-""" Boxplot : Score episodicité totale en P2 en fonction du Groupe d'Age et de la presence de RT"""
+# Boxplot Episodicity score according to the RT  and AgeGroup in P2 with seaborn
 ax = sns.boxplot(x="RT", y="Result", hue= "GroupeAge", data=EpisoRT2)
 ax = sns.stripplot(x="RT", y="Result", data=EpisoRT2, size=4, jitter=True, edgecolor="gray")
 
 
 """ HEDONICITY AND AGE"""
 
-
+# select the Hedonicity score and Age
 HedoAge=df[(df.Test=='hedonicite')]
 df_hedo = HedoAge.dropna(subset=['Result'])
-
-# Mean and std of 
-np.mean(df_hedo.Result[df_hedo.Item == 'champignon']))
-np.mean(df_hedo.Result[df_hedo.Item == 'cassis'])
-np.mean(df_hedo.Result[df_hedo.Item == 'lavande'])
-
-"""
-df_hedo_sort = df_hedo.sort(["Age"])
-plt.plot(df_hedo_sort.Age[df_hedo.Item == 'champignon'],df_hedo_sort.Result[df_hedo_sort.Item == 'champignon'], )
-plt.plot(df_hedo_sort.Age[df_hedo.Item == 'cassis'],df_hedo_sort.Result[df_hedo_sort.Item == 'cassis'])
-"""
 
 #Linear regression between age and hedonicity for all items.
 sns.set(style="ticks", context="talk")
@@ -99,7 +96,6 @@ Item = ["champignon", "cassis", "lavande", "banane", "fenouil", "citron"]
 g = sns.lmplot("Age", "Result", hue="Item", data=df_hedo,
                hue_order= Item, size=6)
 
-"""Show the results of a linear regression within each dataset"""
 
 #Linear regression between age and hedonicity for each item.
 sns.set(style="ticks")
@@ -108,24 +104,19 @@ g= sns.lmplot(x="Age", y="Result", col="Item", hue="Item", data=df_hedo,
            scatter_kws={"s": 50, "alpha": 1})
 
 
-# Quick descriptive analysis
-df_hedo[df_hedo.Item == 'champignon'].describe()
-df_hedo[df_hedo.Item == 'cassis'].describe()
-df_hedo[df_hedo.Item == 'lavande'].describe()
-df_hedo[df_hedo.Item == 'banane'].describe()
-df_hedo[df_hedo.Item == 'fenouil'].describe()
-df_hedo[df_hedo.Item == 'citron'].describe()
-
-
 """ RECOGNITION IMAGE AND AGE"""
+# select the Hedonicity score and Age
 Reco_Im=df[(df.Test=='reconnaissanceImage')] 
 Reco_Im = Reco_Im.dropna(subset=['Result'])
+
+# Linear regression between age and recognition score for the different items
 Reco_Ima = Reco_Im.loc[Reco_Im['Item'].isin(['champignon','cassis','lavande','banane', 'fenouil','citron'])]
 sns.set(style="ticks")
 g= sns.lmplot(x="Age", y="Result", col="Item", hue="Item", data=Reco_Ima,
            col_wrap=2, ci=None, palette="muted", size=4,
            scatter_kws={"s": 50, "alpha": 1})
 
+# Linear regression between age and recognition score for the different items
 Reco_Im=df[(df.Test=='reconnaissanceImage') & (df.Item =='totale')] 
 Reco_Im = Reco_Im.dropna(subset=['Result'])
 sns.set(style="ticks")
@@ -133,12 +124,14 @@ g= sns.lmplot(x="Age", y="Result", col="Item", hue="Item", data=Reco_Im,
            col_wrap=2, ci=None, palette="muted", size=4,
            scatter_kws={"s": 50, "alpha": 1})
 
-# Histogram : Score of reco image
+# Histogram of the recognition score 
+
+# Select recognition image 
 Reco_Im=df[['Item', 'Test', 'Result']][(df.Test=='reconnaissanceImage')] 
 Reco_Im = Reco_Im.dropna(subset=['Result'])
 Reco_Ima = Reco_Im.loc[Reco_Im['Item'].isin(['champignon','cassis','lavande','banane', 'fenouil','citron'])]
 
-##Create a new_dataframe for Reco_Image
+#Create a new_dataframe with the mean and std 
 Reco_Im=df[['Item', 'Test', 'Result']][(df.Test=='reconnaissanceImage')]
 
 itemsAll = np.unique(Reco_Im.Item)
@@ -147,28 +140,33 @@ df_mean.Item = itemsAll
 df_mean['mean'] = [np.mean(Reco_Im.Result[Reco_Im.Item == item]) for item in itemsAll]
 df_mean['std'] = [np.std(Reco_Im.Result[Reco_Im.Item == item]) for item in itemsAll]
 
+# PLot a histogram of the mean of the recogniton image score of the different item
 df_plot = df_mean[["Item","mean"]][df_mean['Item'].isin(['champignon','cassis','lavande','banane', 'fenouil','citron'])]
 df_plot_rotation = df_plot.T
 df_plot_rotation.columns = ["banane", "cassis ","champignon","citron","fenouil","lavande"]
 df_plot_rotation2 = df_plot_rotation.drop("Item")
 df_plot_rotation2.plot(kind='bar') 
 
-
-""" RECOGNITION IMAGE AND AGE"""
+# Recognition Image score and age
+# Select Reconnaissance image test
 Reco_Im=df[(df.Test=='reconnaissanceImage')] 
 Reco_Im = Reco_Im.dropna(subset=['Result'])
 Reco_Ima = Reco_Im.loc[Reco_Im['Item'].isin(['champignon','cassis','lavande','banane', 'fenouil','citron'])]
 sns.set(style="ticks")
+
+#Linear regression of the different items
 g= sns.lmplot(x="Age", y="Result", col="Item", hue="Item", data=Reco_Ima,
            col_wrap=2, ci=None, palette="muted", size=4,
            scatter_kws={"s": 50, "alpha": 1})
-
+plt.show()
+#Linear regression of the all items
 Reco_Im=df[(df.Test=='reconnaissanceImage') & (df.Item =='totale')] 
 Reco_Im = Reco_Im.dropna(subset=['Result'])
 sns.set(style="ticks")
 g= sns.lmplot(x="Age", y="Result", col="Item", hue="Item", data=Reco_Im,
            col_wrap=2, ci=None, palette="muted", size=4,
            scatter_kws={"s": 50, "alpha": 1})
+plt.show()
 
 """ RECOGNITION IMAGE AND ODOR"""
 # histogram with std
@@ -203,7 +201,8 @@ rects2 = ax.bar(ind+width, Mean_item_recoOd, width,
 ax.set_xlim(-width,len(ind)+width)
 ax.set_ylim(0,1)
 ax.set_ylabel('Scores')
-ax.set_title('Scores de Reconnaisance Image et Reconnaissance Odeur en fonction des items)
+ax.set_title('Scores de Reconnaisance Image et Reconnaissance Odeur en fonction"
+              "des items")
 
 xTickMarks = ['champignon','cassis','lavande','banane', 'fenouil','citron']
 ax.set_xticks(ind+width)
@@ -237,38 +236,24 @@ sns.lmplot(x="Age", y="Result", col="Phase", hue="Phase", data=Musi_Age,
            col_wrap=2, ci=None, palette="muted", size=4,
            scatter_kws={"s": 50, "alpha": 1})
 
-"""Plot the different item_music according to P1 and P2"""
 
-# Plot the different champignon_music according to P1 and P2
+# Plot the different item_music according to P1 and P2
+list_item = ['champignon','cassis','lavande','banane', 'fenouil','citron']
 
-Musi= df[(df.Test=='musique') & (df.Item=='champignon') ] 
-Music= Musi.dropna(subset=['Result'])
-sns.set(style="whitegrid")
+for i in list_item:
+    
+    Musi= df[(df.Test=='musique') & (df.Item== i) ] 
+    Music= Musi.dropna(subset=['Result'])
+    sns.set(style="whitegrid")
 
-g = sns.PairGrid(Music, y_vars="Result",
+    g = sns.PairGrid(Music, y_vars="Result",
                  x_vars=['Phase'],
                  size=5, aspect=.5)
 
-
-g.map(sns.pointplot, color=sns.xkcd_rgb["plum"])
-g.set(ylim=(0, 1.5))
-sns.despine(fig=g.fig, left=True)
-
-# Plot the different cassis_music according to P1 and P2
-
-Musi= df[(df.Test=='musique') & (df.Item=='cassis') ] 
-Music= Musi.dropna(subset=['Result'])
-sns.set(style="whitegrid")
-
-g = sns.PairGrid(Music, y_vars="Result",
-                 x_vars=['Phase'],
-                 size=5, aspect=.5)
-
-
-g.map(sns.pointplot, color=sns.xkcd_rgb["plum"])
-g.set(ylim=(0, 1.5))
-sns.despine(fig=g.fig, left=True)
-
+    g.map(sns.pointplot, color=sns.xkcd_rgb["plum"])
+    g.set(ylim=(0, 1.5))
+    sns.despine(fig=g.fig, left=True)
+    
 
 """MUSIQUE ET HEDONICITE """
 
