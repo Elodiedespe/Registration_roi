@@ -40,15 +40,16 @@ exdf = dfOutput[(dfOutput.GroupeAge == 'Grand') & (dfOutput.Phase == 'P1') & (df
 import seaborn as sns
 import pandas as pd
 import matplotlib.pyplot as plt
+import scipy
 
 df = pd.read_csv('/home/edogerde/Desktop/hippomuseDataBase.csv')
 
 """TOTAL EPISODICITY AND AGE AND RT during P1 & P2"""
 #Select the test "episocite" and phase "1" 
 EpisoRT=df[(df.Test=='episodicite') & (df.Phase=='P1')]
-EpisoRT2 = EpisoRT.dropna(subset=['Result'])
-EpisoRT=EpisoRT["Age"].sort_values()
-#Select the test "episocite" and phase "1"
+EpisoRT = EpisoRT.dropna(subset=['Result'])
+Episo=EpisoRT["Age"].sort_values()
+#Select the test "episocite" and phase "2"
 EpisoRT= df[(df.Test=='episodicite') & (df.Phase=='P2')]
 EpisoRT=EpisoRT["Age"].sort_values()
 EpisoRT2 = EpisoRT.dropna(subset=['Result'])
@@ -170,7 +171,7 @@ plt.show()
 
 """ RECOGNITION IMAGE AND ODOR"""
 # histogram with std
-df= pd.read_csv('/home/edogerde/Desktop/df_mean.csv')
+df_mean= pd.read_csv('/home/edogerde/Desktop/df_mean.csv')
 
 fig = plt.figure()
 ax = fig.add_subplot(111)
@@ -179,7 +180,7 @@ ax = fig.add_subplot(111)
 N=6
 Mean_item_recoIm=[0.944444,0.500000 ,0.222222,1.000000, 0.166667,0.888889]
 std_item_recoIm=[0.235000,0.510000,0.427793,0.000000,0.383482,0.323381]
-# data Hedo
+# data Reco
 Mean_item_recoOd=[0.333333,0.500000,0.722222,0.500000, 0.388889,0.666667]
 std_item_recoOd=[0.470000, 0.510000, 0.440000, 0.510000,0.487000, 0.471000]
 
@@ -217,20 +218,20 @@ plt.show()
 """MUSIQUE ET AGE """
 
 # Plot separately musique according to Age within P1 & P2
-Musi=df[(df.Test=='musique') & (df.Phase == "P2") & (df.Item == "totale")]
-Musi_Age= Musi.dropna(subset=["Result"])
-
-
-sns.set(style="darkgrid", color_codes=True)
-
-sns.jointplot("Age", "Result",data=Musi_Age, kind="reg",
-               xlim=(0, 13), ylim=(0, 16), color="r", size=7)
+list_item = ["P1", "P2"]
+for i in list_item:
+    Musi=df[(df.Test=='musique') & (df.Phase == i) & (df.Item == "totale")]
+    Musi_Age= Musi.dropna(subset=["Result"])
+    sns.set(style="darkgrid", color_codes=True)
+    sns.jointplot("Age", "Result",data=Musi_Age, kind="reg",
+               xlim=(0, 13), ylim=(-0.5, 6), color="r", size=7)
 
 # Plot musique according to Age in P1 and P2 
 sns.set(style="ticks")
 
-Musi=df[(df.Test=='musique') & (df.Item == "totale")]
-Musi_Age= Musi.dropna(subset=["Result"])
+Musi1=df[(df.Test=='musique')] & (df.Item == "totale")]
+
+Musi= Musi2.dropna(subset=["Result"])
 
 sns.lmplot(x="Age", y="Result", col="Phase", hue="Phase", data=Musi_Age,
            col_wrap=2, ci=None, palette="muted", size=4,
@@ -250,14 +251,92 @@ for i in list_item:
                  x_vars=['Phase'],
                  size=5, aspect=.5)
 
-    g.map(sns.pointplot, color=sns.xkcd_rgb["plum"])
+    g.map(sns.pointplot, color=sns.xkcd_rgb["blue"])
     g.set(ylim=(0, 1.5))
     sns.despine(fig=g.fig, left=True)
+
+# PLot the different Tests score acoording to P1 and P2
+Tests= ['musique', 'what']    
+for test in Tests:
+    df_Test= df[(df.Test== test)]    
+    R = df_Test.loc[df_Test['Item'].isin(['champignon','cassis','lavande','banane', 'fenouil','citron'])]  
+    sns.pointplot(x="Phase", y="Result", hue="Item", data=R)
+    plt.ylabel('Score %s'%(test))
+    plt.show()
+
+
+
+"""HISTOGRAMS OF THE DEPENDANTS VARIABLES ("hedonicite", "reconnaissanceImage",
+ "reconnaissanceOdeur")"""
+
+Tests = ["hedonicite", "reconnaissanceImage", "reconnaissanceOdeur"]
+for t in Tests:
+Test_nan = df[['Item', 'Test', 'Result']][(df.Test== "hedonicite") & (df.Phase=='P1')]
+Test_sansNan = Test_nan.dropna(subset=["Result"])
+itemsAll = np.unique(Test_sansNan.Item)
+
+df_mean=pd.DataFrame(columns = ['Item', 'mean', 'std'])
+df_mean.Item = itemsAll
+df_mean['mean'] = [np.mean(Test_sansNan.Result[Test_sansNan.Item == item]) for item in itemsAll]
+df_mean['std'] = [np.std(Test_sansNan.Result[Test_sansNan.Item == item]) for item in itemsAll]
+
+Mean_item_recoIm = []
+std_item_recoIm= []
+xTickMarks = []
+
+for i in np.array(df_mean["Item"]):
+    xTickMarks.append(i)
     
+for m in np.array(df_mean['mean']):
+    Mean_item_recoIm.append(m)
+        
+for s in np.array(df_mean['std']):
+    std_item_recoIm.append(m)
 
-"""MUSIQUE ET HEDONICITE """
+# data reco
+
+fig = plt.figure()
+ax = fig.add_subplot(111)
+
+# data reco
+N=6
+
+ind=np.arange(N) 
+width=0.35
+
+## the bars
+rects1 = ax.bar(ind, Mean_item_recoIm, width,
+                color='blue',
+                yerr=std_item_recoIm,
+                error_kw=dict(elinewidth=2,ecolor='red'))
+    
+# axes and labels
+ax.set_xlim(-width,len(ind)+width)
+ax.set_ylim(0,2)
+ax.set_ylabel("Scores %s" %(t))
+
+ax.set_xticks(ind+width)
+xtickNames = ax.set_xticklabels(xTickMarks)
+plt.setp(xtickNames, rotation=45, fontsize=10)
 
 
-"""MUSIQUE ET RECONNAISSANCEODEUR """ 
+    
+# Plot for the RT groupe the different Score test according to the Phase and the Age of RT     
+import seaborn as sns
+
+EpisoR=df[(df.Test=='what') & (df.RT=='RT') & (df.GroupeAge=='Moyen')]
+EpisoRT= EpisoR.sort_values(by = 'Age')
+EpisoRT = EpisoRT.dropna(subset=['Result'])
+
+sns.set(style="whitegrid")
+
+g = sns.PairGrid(EpisoRT, y_vars="Result",
+                 x_vars=["AgeRT"],
+                 size=5, aspect=.5)
+g.map(sns.pointplot, color=sns.xkcd_rgb["blue"])
+g.set(ylim=(0, 3))
+sns.despine(fig=g.fig, left=True)
 
 
+sns.pointplot(x="Phase", y="Result", hue="Item", data=EpisoRT)
+plt.show()
