@@ -42,21 +42,22 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import scipy
 
-df = pd.read_csv('/home/edogerde/Desktop/hippomuseDataBase.csv')
+df = pd.read_csv('/home/edogerde/Registration_roi/hippomuseDataBase.csv')
 
 """TOTAL EPISODICITY AND AGE AND RT during P1 & P2"""
 #Select the test "episocite" and phase "1" 
-EpisoRT=df[(df.Test=='episodicite') & (df.Phase=='P1')]
-EpisoRT = EpisoRT.dropna(subset=['Result'])
-Episo=EpisoRT["Age"].sort_values()
+Episo=df[(df.Test=='episodicite') & (df.Phase=='P1')]
+Episo1= Episo.sort_values(by = 'Age')
+df_Episo = Episo1.dropna(subset=['Result'])
+
+
 #Select the test "episocite" and phase "2"
 EpisoRT= df[(df.Test=='episodicite') & (df.Phase=='P2')]
-EpisoRT=EpisoRT["Age"].sort_values()
 EpisoRT2 = EpisoRT.dropna(subset=['Result'])
-
+EpisoRT=EpisoRT["Age"].sort_values()
 # Plot Episodicity score according to the RT  and the Age in P1 with mathplotlib
-plt.plot(EpisoRT2.Age[EpisoRT2.RT == 'RT'],EpisoRT2.Result[EpisoRT2.RT == 'RT'],'o')
-plt.plot(EpisoRT2.Age[EpisoRT2.RT == 'Pas RT'],EpisoRT2.Result[EpisoRT2.RT == 'Pas RT'], 'o')
+plt.plot(df_Episo.Age[df_Episo.RT == 'RT'],df_Episo.Result[df_Episo.RT == 'RT'],'o')
+plt.plot(df_Episo.Age[df_Episo.RT == 'Pas RT'],df_Episo.Result[df_Episo.RT == 'Pas RT'], 'o')
 plt.ylabel("Score épisodicité totale en phase 1")
 plt.xlabel("Age")
 plt.title("Score episodicité totale en P1 en fonction de l'âge et de la presence de RT")
@@ -269,10 +270,11 @@ for test in Tests:
 """HISTOGRAMS OF THE DEPENDANTS VARIABLES ("hedonicite", "reconnaissanceImage",
  "reconnaissanceOdeur")"""
 
-Tests = ["hedonicite", "reconnaissanceImage", "reconnaissanceOdeur"]
+Tests = ["hedonicite", "reconnaissanceImage", "reconnaissanceOdeur", "totale", "musique"]
 for t in Tests:
-Test_nan = df[['Item', 'Test', 'Result']][(df.Test== "hedonicite") & (df.Phase=='P1')]
-Test_sansNan = Test_nan.dropna(subset=["Result"])
+Test_nan = df[['Item', 'Test', 'Result', 'Phase']][(df.Test== "musique") & (df.Phase=='P2')]
+Test_nan1 = Test_nan.loc[Test_nan['Item'].isin(['champignon','cassis','lavande','banane', 'fenouil','citron'])]  
+Test_sansNan = Test_nan1.dropna(subset=["Result"])
 itemsAll = np.unique(Test_sansNan.Item)
 
 df_mean=pd.DataFrame(columns = ['Item', 'mean', 'std'])
@@ -288,13 +290,12 @@ for i in np.array(df_mean["Item"]):
     xTickMarks.append(i)
     
 for m in np.array(df_mean['mean']):
-    Mean_item_recoIm.append(m)
+        Mean_item_recoIm.append(m)
         
 for s in np.array(df_mean['std']):
     std_item_recoIm.append(m)
 
 # data reco
-
 fig = plt.figure()
 ax = fig.add_subplot(111)
 
@@ -312,12 +313,13 @@ rects1 = ax.bar(ind, Mean_item_recoIm, width,
     
 # axes and labels
 ax.set_xlim(-width,len(ind)+width)
-ax.set_ylim(0,2)
-ax.set_ylabel("Scores %s" %(t))
+ax.set_ylim(0,1)
+ax.set_ylabel("Scores association musique odeur en recuperation")
 
 ax.set_xticks(ind+width)
 xtickNames = ax.set_xticklabels(xTickMarks)
 plt.setp(xtickNames, rotation=45, fontsize=10)
+
 
 
     
